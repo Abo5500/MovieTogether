@@ -25,6 +25,7 @@ namespace Infrastructure.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<RefreshToken>().HasOne<ApplicationUser>().WithMany(x => x.RefreshTokens).HasForeignKey(x => x.UserId).IsRequired();
             modelBuilder.Entity<ApplicationUser>(entity =>
             {
                 entity.ToTable(name: "User");

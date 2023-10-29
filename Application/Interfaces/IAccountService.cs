@@ -12,6 +12,6 @@ namespace Application.Interfaces
         Task<AuthenticationResponse> AuthenticateAsync(AuthenticationRequest request);
         Task<AuthenticationResponse> RegisterAsync(RegisterRequest registerRequest);
         Task<RefreshTokensResponse> RefreshTokensAsync(RefreshTokensRequest request);
-        Task RevokeRefreshTokenAsync(string userId,string refreshToken);
+        Task<bool> RevokeRefreshTokenAsync(string userId,string? refreshToken = null);
     }
 }

@@ -33,7 +33,6 @@ namespace Tests
             AuthenticationResponse authResponse = new AuthenticationResponse()
             {
                 AccessToken = "NotNullOrEmpty",
-                RefreshToken = "NotNullOrEmpty",
                 Email = "TestEmail",
                 UserName = "TestName",
                 UserId = "NotNullOrEmpty",
@@ -41,16 +40,16 @@ namespace Tests
             };
             var mockUserManager = MockHelper.GetUserManager();
             mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), registerRequest.Password)).ReturnsAsync(IdentityResult.Success);
-            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings());
+            var mockHttpContextAccessor = MockHelper.GetHttpContextAccessor();
+            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings().Object, mockHttpContextAccessor.Object);
             //Act
             var result = await accountService.RegisterAsync(registerRequest);
             //Assert
             Assert.Equal(authResponse.Email, result.Email);
             Assert.Equal(authResponse.UserName, result.UserName);
             Assert.Equal(authResponse.Roles.First(), result.Roles.First());
-            Assert.False(string.IsNullOrEmpty(result.AccessToken));
-            Assert.False(string.IsNullOrEmpty(result.RefreshToken));
             Assert.False(string.IsNullOrEmpty(result.UserId));
+            Assert.NotNull(result.AccessToken);
         }
         [Fact]
         public async Task RegisterEmailAlreadyExists()
@@ -65,7 +64,8 @@ namespace Tests
             };
             var mockUserManager = MockHelper.GetUserManager();
             mockUserManager.Setup(x => x.FindByEmailAsync(registerRequest.Email)).ReturnsAsync(new ApplicationUser());
-            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings());
+            var mockHttpContextAccessor = MockHelper.GetHttpContextAccessor();
+            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings().Object, mockHttpContextAccessor.Object);
             //Act
             //Assert
             await Assert.ThrowsAsync<ApiException>(() => accountService.RegisterAsync(registerRequest));
@@ -83,7 +83,8 @@ namespace Tests
             };
             var mockUserManager = MockHelper.GetUserManager();
             mockUserManager.Setup(x => x.FindByNameAsync(registerRequest.UserName)).ReturnsAsync(new ApplicationUser());
-            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings());
+            var mockHttpContextAccessor = MockHelper.GetHttpContextAccessor();
+            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings().Object, mockHttpContextAccessor.Object);
             //Act
             //Assert
             await Assert.ThrowsAsync<ApiException>(() => accountService.RegisterAsync(registerRequest));
@@ -101,7 +102,6 @@ namespace Tests
             AuthenticationResponse authResponse = new AuthenticationResponse()
             {
                 AccessToken = "NotNullOrEmpty",
-                RefreshToken = "NotNullOrEmpty",
                 Email = "TestEmail",
                 UserName = "TestName",
                 UserId = "NotNullOrEmpty",
@@ -111,16 +111,16 @@ namespace Tests
 
             mockUserManager.Setup(x => x.FindByEmailAsync(authRequest.Email)).ReturnsAsync(user);
             mockUserManager.Setup(x => x.CheckPasswordAsync(user, authRequest.Password)).ReturnsAsync(true);
-            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings());
+            var mockHttpContextAccessor = MockHelper.GetHttpContextAccessor();
+            var accountService = new AccountService(mockUserManager.Object, MockHelper.GetJwtSettings().Object, mockHttpContextAccessor.Object);
             //Act
             var result = await accountService.AuthenticateAsync(authRequest);
             //Assert
             Assert.Equal(authResponse.Email, result.Email);
             Assert.Equal(authResponse.UserName, result.UserName);
             Assert.Equal(authResponse.Roles.First(), result.Roles.First());
-            Assert.False(string.IsNullOrEmpty(result.AccessToken));
-            Assert.False(string.IsNullOrEmpty(result.RefreshToken));
             Assert.False(string.IsNullOrEmpty(result.UserId));
+            Assert.NotNull(result.AccessToken);
         }
     }
 }
