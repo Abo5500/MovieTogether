@@ -1,5 +1,6 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces;
+using Application.Mapping;
 using Domain.Settings;
 using Infrastructure.Contexts;
 using Infrastructure.Models;
@@ -22,15 +23,16 @@ namespace Infrastructure
 {
     public static class ServiceExtensions
     {
-        public static void AddDatabaseInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static void AddServicesInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
-            #region Repositories
-
+            #region Services
+            services.AddScoped<IMovieMappingService, MovieMappingService>();
+            services.AddScoped<IMovieService, MovieService>();
             #endregion
         }
         public static void AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
@@ -61,10 +63,10 @@ namespace Infrastructure
                 options.User.RequireUniqueEmail = true;
             });
 
-            services.AddAuthentication(options =>
-            {
+            services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(o =>
                 {
@@ -95,9 +97,10 @@ namespace Infrastructure
                             context.Response.StatusCode = 403;
                             context.Response.ContentType = "application/json";
                             return context.Response.WriteAsync("You are not authorized to access this resource");
-                        },
+                        }
                     };
                 });
         }
+
     }
 }
