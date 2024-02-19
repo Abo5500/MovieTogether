@@ -10,6 +10,7 @@ namespace MovieTogether.Domain.Entities
     {
         public int Id { get; set; }
         public string FullName { get; set; }
+        public int KinopoiskId { get; set; }
         public List<Movie>? Movies { get; set; }
     }
 }

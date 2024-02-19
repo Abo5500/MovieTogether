@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231026113734_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231106103534_UpdateActor")]
+    partial class UpdateActor
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,21 @@ namespace Infrastructure.Migrations
                     b.HasIndex("MoviesId");
 
                     b.ToTable("ActorMovie");
+                });
+
+            modelBuilder.Entity("ApplicationUserMovie", b =>
+                {
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("LikedMoviesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ApplicationUserId", "LikedMoviesId");
+
+                    b.HasIndex("LikedMoviesId");
+
+                    b.ToTable("ApplicationUserMovie");
                 });
 
             modelBuilder.Entity("CountryMovie", b =>
@@ -78,9 +93,6 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
@@ -90,11 +102,11 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
                 });
@@ -328,6 +340,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("KinopoiskId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Actors");
@@ -392,9 +407,6 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -422,8 +434,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.ToTable("Movies");
                 });
 
@@ -438,6 +448,21 @@ namespace Infrastructure.Migrations
                     b.HasOne("MovieTogether.Domain.Entities.Movie", null)
                         .WithMany()
                         .HasForeignKey("MoviesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ApplicationUserMovie", b =>
+                {
+                    b.HasOne("Infrastructure.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MovieTogether.Domain.Entities.Movie", null)
+                        .WithMany()
+                        .HasForeignKey("LikedMoviesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -476,7 +501,9 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Infrastructure.Models.ApplicationUser", null)
                         .WithMany("RefreshTokens")
-                        .HasForeignKey("ApplicationUserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GenreMovie", b =>
@@ -545,17 +572,8 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MovieTogether.Domain.Entities.Movie", b =>
-                {
-                    b.HasOne("Infrastructure.Models.ApplicationUser", null)
-                        .WithMany("LikedMovies")
-                        .HasForeignKey("ApplicationUserId");
-                });
-
             modelBuilder.Entity("Infrastructure.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("LikedMovies");
-
                     b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618

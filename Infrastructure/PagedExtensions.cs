@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Movie;
 using Application.Enums;
+using Microsoft.EntityFrameworkCore;
 using MovieTogether.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,12 @@ namespace Infrastructure
         {
             return values.Skip((page - 1) * pageSize).Take(pageSize);
         }
-        public static int GetWithFilterCount(this IQueryable<Movie>? movies, MovieFilterDTO filter)
+        public static async Task<int> GetWithFilterCount(this IQueryable<Movie>? movies, MovieFilterDTO filter)
         {
             movies = movies.GetWithFilter(filter);
             if (movies != null)
             {
-                return movies.Count();
+                return await movies.CountAsync();
             }
             return 0;
         }
@@ -33,9 +34,9 @@ namespace Infrastructure
         public static IQueryable<Movie>? GetWithFilter(this IQueryable<Movie>? movies, MovieFilterDTO filter)
         {
             if(movies == null) return null;
-            if (filter.YearsRange.Any())
+            if (filter.Years.Any())
             {
-                movies = movies.Where(x => filter.YearsRange.Contains(x.Year));
+                movies = movies.Where(x => filter.Years.Contains(x.Year));
             }
             if (filter.CountryIds.Any())
             {

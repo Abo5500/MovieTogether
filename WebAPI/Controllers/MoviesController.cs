@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI.Controllers
 {
@@ -16,7 +17,7 @@ namespace WebAPI.Controllers
             _movieService = movieService;
         }
         [HttpGet("byId")]
-        public async Task<IActionResult> GetByIdAsync([FromQuery]int id)
+        public async Task<IActionResult> GetByIdAsync([FromQuery][Required] int id)
         {
             return Ok(await _movieService.GetByIdAsync(id));
         }
@@ -26,30 +27,35 @@ namespace WebAPI.Controllers
             return Ok(await _movieService.GetAllAsync(filter));
         }
         [HttpGet("liked")]
-        public async Task<IActionResult> GetLikedAsync([FromQuery]string userName, [FromQuery]MovieFilterDTO filter)
+        public async Task<IActionResult> GetLikedAsync([FromQuery][Required] string userName, [FromQuery]MovieFilterDTO filter)
         {
             return Ok(await _movieService.GetLikedAsync(userName, filter));
         }
         [Authorize]
         [HttpPatch("setIsLiked")]
-        public async Task<IActionResult> SetIsLikedAsync([FromQuery]int movieId, [FromQuery]bool isLiked)
+        public async Task<IActionResult> SetIsLikedAsync([FromQuery][Required]int id, [FromQuery]bool isLiked)
         {
-            return Ok(await _movieService.SetIsLiked(movieId, isLiked));
+            return Ok(await _movieService.SetIsLiked(id, isLiked));
         }
         [HttpGet("byActorId")]
-        public async Task<IActionResult> GetByActorIdAsync([FromQuery] int actorId, [FromQuery]MovieFilterDTO filter)
+        public async Task<IActionResult> GetByActorIdAsync([FromQuery][Required] int id, [FromQuery]MovieFilterDTO filter)
         {
-            return Ok(await _movieService.GetByActorIdAsync(actorId, filter));
+            return Ok(await _movieService.GetByActorIdAsync(id, filter));
         }
         [HttpGet("byDirectorId")]
-        public async Task<IActionResult> GetByDirectorIdAsync([FromQuery] int directorId, [FromQuery]MovieFilterDTO filter)
+        public async Task<IActionResult> GetByDirectorIdAsync([FromQuery][Required] int id, [FromQuery]MovieFilterDTO filter)
         {
-            return Ok(await _movieService.GetByDirectorIdAsync(directorId, filter));
+            return Ok(await _movieService.GetByDirectorIdAsync(id, filter));
         }
         [HttpGet("byTitle")]
-        public async Task<IActionResult> GetByTitleAsync([FromQuery] string title, [FromQuery]MovieFilterDTO filter)
+        public async Task<IActionResult> GetByTitleAsync([FromQuery][Required] string title, [FromQuery]MovieFilterDTO filter)
         {
             return Ok(await _movieService.GetByTitleAsync(title, filter));
+        }
+        [HttpGet("coincidences")]
+        public async Task<IActionResult> GetCoincidencesAsync([FromQuery][Required] List<string> usernames)
+        {
+            return Ok(await _movieService.GetMovieCoincidencesAsync(usernames));
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Application.Interfaces
         Task<PagedMovieDTO> GetByActorIdAsync(int actorId, MovieFilterDTO filter);
         Task<PagedMovieDTO> GetByDirectorIdAsync(int directorId, MovieFilterDTO filter);
         Task<PagedMovieDTO> GetLikedAsync(string userName, MovieFilterDTO filter);
-        Task<bool> SetIsLiked(int movieId, bool isLiked); 
+        Task<bool> SetIsLiked(int movieId, bool isLiked);
+        Task<List<MovieDTO>> GetMovieCoincidencesAsync(List<string> usernames);
     }
 }

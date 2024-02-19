@@ -10,6 +10,7 @@ namespace Application.DTOs.Filter
     {
         public int Id { get; set; }
         public string FullName { get; set; }
-        public List<string>? Movies { get; set; }
+        public List<string>? TopMovies { get; set; }
+        public int MovieCount { get; set; }
     }
 }

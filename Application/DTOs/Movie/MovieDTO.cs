@@ -23,5 +23,6 @@ namespace Application.DTOs.Movie
         public List<string>? Directors { get; set; }
         public List<string>? Countries { get; set; }
         public bool IsLiked { get; set; }
+        public int CoincidenceCount { get; set; } = 1;
     }
 }
