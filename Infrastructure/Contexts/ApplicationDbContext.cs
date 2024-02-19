@@ -25,11 +25,17 @@ namespace Infrastructure.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Actor>().HasIndex(x => x.FullName);
+            modelBuilder.Entity<Director>().HasIndex(x => x.FullName);
+            modelBuilder.Entity<Genre>().HasIndex(x => x.Name);
+            modelBuilder.Entity<Country>().HasIndex(x => x.Name);
+            modelBuilder.Entity<Movie>().HasIndex(x => x.RateCount);
             modelBuilder.Entity<RefreshToken>().HasOne<ApplicationUser>().WithMany(x => x.RefreshTokens).HasForeignKey(x => x.UserId).IsRequired();
             modelBuilder.Entity<ApplicationUser>(entity =>
             {
                 entity.ToTable(name: "User");
                 entity.HasIndex(x => x.UserName).IsUnique();
+                entity.HasMany(x => x.LikedMovies).WithMany();
             });
             modelBuilder.Entity<IdentityRole>(entity =>
             {

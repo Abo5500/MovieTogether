@@ -40,7 +40,7 @@ namespace Infrastructure.Services
                 .Include(x => x.Actors).Include(x => x.Directors).Include(x => x.Countries).Include(x => x.Genres)
                 .Where(x => x.Actors.Contains(actor));
 
-            dto.EntityCount = query.GetWithFilterCount(filter);
+            dto.EntityCount = await query.GetWithFilterCount(filter);
             dto.PageCount = GetPageCount(dto.EntityCount, dto.PageSize);
             List<Movie> movies = new();
             List<MovieDTO> moviesDto = new();
@@ -62,7 +62,7 @@ namespace Infrastructure.Services
                 .Include(x => x.Actors).Include(x => x.Directors).Include(x => x.Countries).Include(x => x.Genres)
                 .Where(x => x.Directors.Contains(director));
 
-            dto.EntityCount = query.GetWithFilterCount(filter);
+            dto.EntityCount = await query.GetWithFilterCount(filter);
             dto.PageCount = GetPageCount(dto.EntityCount, dto.PageSize);
             List<Movie> movies = new();
             List<MovieDTO> moviesDto = new();
@@ -96,7 +96,7 @@ namespace Infrastructure.Services
                 .Include(x => x.Actors).Include(x => x.Directors).Include(x => x.Countries).Include(x => x.Genres)
                 .Where(x => x.Title.ToLower().Contains(title.ToLower()));
 
-            dto.EntityCount = query.GetWithFilterCount(filter);
+            dto.EntityCount = await query.GetWithFilterCount(filter);
             dto.PageCount = GetPageCount(dto.EntityCount, dto.PageSize);
             List<Movie> movies = new();
             List<MovieDTO> moviesDto = new();
@@ -118,17 +118,17 @@ namespace Infrastructure.Services
                 .Include(x => x.Actors).Include(x => x.Directors).Include(x => x.Countries).Include(x => x.Genres).ToListAsync();
             var moviesDto = _mappingService.MapMoviesToDto(movies);
             await SetLikedMovies(moviesDto);
-            dto.EntityCount = _context.Movies.GetWithFilterCount(filter);
+            dto.EntityCount = await _context.Movies.GetWithFilterCount(filter);
             dto.PageCount = GetPageCount(dto.EntityCount, dto.PageSize);
             dto.MovieDTOs = moviesDto;
             dto.Page = filter.Page;
             return dto;
         }
-        public async Task<PagedMovieDTO> GetLikedAsync(string userName, MovieFilterDTO filter)
+        public async Task<PagedMovieDTO> GetLikedAsync(string username, MovieFilterDTO filter)
         {
             ApplicationUser user = await _context.Users.Include(x => x.LikedMovies)
-                .FirstOrDefaultAsync(x => x.UserName == userName) ??
-                throw new ApiException($"Пользователя с ником \"{userName}\" не существует");
+                .FirstOrDefaultAsync(x => x.UserName == username) ??
+                throw new ApiException($"Пользователя с ником \"{username}\" не существует");
             
             PagedMovieDTO dto = new();
             if(user.LikedMovies != null)
@@ -171,6 +171,43 @@ namespace Infrastructure.Services
             await _context.SaveChangesAsync();
             return isLiked;
         }
+        public async Task<List<MovieDTO>> GetMovieCoincidencesAsync(List<string> usernames)
+        {
+            List<MovieDTO> coincidenceMovieDTOs = new List<MovieDTO>();
+            Dictionary<int, int> coincidences = new();
+
+            foreach(var username in usernames)
+            {
+                ApplicationUser user = await _context.Users.Include(x => x.LikedMovies)
+                .FirstOrDefaultAsync(x => x.UserName == username) ??
+                throw new ApiException($"Пользователя с ником \"{username}\" не существует");
+                if (user.LikedMovies != null)
+                {
+                    foreach(var movie in user.LikedMovies)
+                    {
+                        if (coincidences.ContainsKey(movie.Id))
+                        {
+                            coincidences[movie.Id]++;
+                        }
+                        else
+                        {
+                            coincidences.Add(movie.Id, 1);
+                        }
+                    }
+                }
+            }
+            foreach(var coincidence in coincidences)
+            {
+                if(coincidence.Value != 1)
+                {
+                    MovieDTO movie = await GetByIdAsync(coincidence.Key);
+                    movie.CoincidenceCount = coincidence.Value;
+                    coincidenceMovieDTOs.Add(movie);
+                }
+            }
+            return coincidenceMovieDTOs;
+        }
+
         private static int GetPageCount(int count, int pageSize)
         {
             return (int)Math.Ceiling((double)count / pageSize);

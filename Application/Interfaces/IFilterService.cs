@@ -10,8 +10,10 @@ namespace Application.Interfaces
     public interface IFilterService
     {
         List<MovieSortDTO> GetMovieSorts();
-        List<GenreDTO> GetGenres();
-        List<CountryDTO> GetCountries();
+        Task<List<GenreDTO>> GetGenresAsync();
+        Task<List<CountryDTO>> GetCountriesAsync();
+        Task<PagedActorDTO> GetActorsAsync(int page = 1);
+        Task<PagedDirectorDTO> GetDirectorsAsync(int page = 1);
         Task<PagedActorDTO> GetActorsByNameAsync(string fullName, int page = 1);
         Task<PagedDirectorDTO> GetDirectorsByNameAsync(string fullName, int page = 1);   
     }

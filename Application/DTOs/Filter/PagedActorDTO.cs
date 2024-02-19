@@ -8,7 +8,7 @@ namespace Application.DTOs.Filter
 {
     public class PagedActorDTO : PagedBase
     {
-        public List<ActorDTO>? Actors { get; set; }
+        public List<ActorDTO> Actors { get; set; } = new();
         
     }
 }

@@ -33,6 +33,8 @@ namespace Infrastructure
             #region Services
             services.AddScoped<IMovieMappingService, MovieMappingService>();
             services.AddScoped<IMovieService, MovieService>();
+            services.AddScoped<IFilterService, FilterService>();
+            services.AddScoped<IAnotherService, AnotherService>();
             #endregion
         }
         public static void AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)

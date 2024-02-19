@@ -8,5 +8,6 @@ namespace Application.DTOs.Filter
 {
     public class PagedDirectorDTO : PagedBase
     {
+        public List<DirectorDTO> Directors { get; set; } = new();
     }
 }
